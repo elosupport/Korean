@@ -1,23 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using EloBuddy;
 using EloBuddy.SDK;
+using EloBuddy.SDK.Enumerations;
 using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
+using EloBuddy.SDK.Rendering;
 using SharpDX;
+using SharpDX.Direct3D9;
+using SharpDX.Direct3D;
+using System.Drawing;
 using Color = System.Drawing.Color;
 
 namespace LittleHumanizer
 {
-    static class Program
+    public static class Program
     {
-        static Menu _menu, _setting;
-        static Random _random;
-        static Dictionary<string, int> _lastCommandT;
+        public static Menu _menu, _setting;
+        public static Random _random;
+        public static Dictionary<string, int> _lastCommandT;
         public static int BlockedCount = 0;
-        static bool _thisMovementCommandHasBeenTamperedWith = false;
+        public static bool _thisMovementCommandHasBeenTamperedWith = false;
         public static LastSpellCast LastSpell = new LastSpellCast();
         public static List<LastSpellCast> LastSpellsCast = new List<LastSpellCast>();
 
@@ -26,7 +33,7 @@ namespace LittleHumanizer
             get { return (int)(Game.Time * 1000); }
         }
 
-        static double Randomize(int min, int max)
+        public static double Randomize(int min, int max)
         {
             var x = _random.Next(min, max) + 1 + 1 - 1 - 1;
             var y = _random.Next(min, max);
@@ -41,7 +48,7 @@ namespace LittleHumanizer
             return y;
         }
 
-        static void OnLoadingComplete(EventArgs args)
+        public static void OnLoadingComplete(EventArgs args)
         {
             Chat.Print("LittleHumanizer Loaded! By Support");
             _menu = MainMenu.AddMenu("LittleHumanizer", "LittleHumanizer");
@@ -59,7 +66,7 @@ namespace LittleHumanizer
                      _random.Next(0, 1) > 0 ? (int)Math.Floor(Randomize(7, 11)) : (int)Math.Ceiling(Randomize(7, 11)), 7, 15));
         }
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             _random = new Random(DateTime.Now.Millisecond);
             _lastCommandT = new Dictionary<string, int>();
@@ -114,64 +121,55 @@ namespace LittleHumanizer
                 _lastCommandT.Add(orderName, Environment.TickCount);
             };
 
-            Spellbook.OnCastSpell += (Spellbook sender, SpellbookCastSpellEventArgs arg) =>
-            {
-                if (!_menu["Spells"].Cast<CheckBox>().CurrentValue)
-                    return;
-                if (!sender.Owner.IsMe)
-                    return;
-                if (!(new[]
-                {
-                SpellSlot.Q, SpellSlot.W, SpellSlot.E, SpellSlot.R, SpellSlot.Summoner1, SpellSlot.Summoner2
-                , SpellSlot.Item1, SpellSlot.Item2, SpellSlot.Item3, SpellSlot.Item4, SpellSlot.Item5, SpellSlot.Item6,
-                SpellSlot.Trinket
-            })
-                    .Contains(arg.Slot))
-                    return;
-                if (Environment.TickCount - LastSpell.CastTick < 50)
-                {
-                    arg.Process = false;
-                    BlockedCount += 1;
-                }
-                else
-                {
-                    LastSpell = new LastSpellCast { Slot = arg.Slot, CastTick = Environment.TickCount };
-                }
-                if (LastSpellsCast.Any(x => x.Slot == arg.Slot))
-                {
-                    var spell = LastSpellsCast.FirstOrDefault(x => x.Slot == arg.Slot);
-                    if (spell != null)
-                    {
-                        if (Environment.TickCount - spell.CastTick <= 250 + Game.Ping)
-                        {
-                            arg.Process = false;
-                            BlockedCount += 1;
-                        }
-                        else
-                        {
-                            LastSpellsCast.RemoveAll(x => x.Slot == arg.Slot);
-                            LastSpellsCast.Add(new LastSpellCast { Slot = arg.Slot, CastTick = Environment.TickCount });
-                        }
-                    }
-                    else
-                    {
-                        LastSpellsCast.Add(new LastSpellCast { Slot = arg.Slot, CastTick = Environment.TickCount });
-                    }
-                }
-                else
-                {
-                    LastSpellsCast.Add(new LastSpellCast { Slot = arg.Slot, CastTick = Environment.TickCount });
-                }
-            };
+            Spellbook.OnCastSpell += Spellbook_OnCastSpell;
 
         }
 
-
-        //public static void Player_OnIssueOrder(Obj_AI_Base sender, PlayerIssueOrderEventArgs issueOrderEventArgs)
-        
-
-        //private static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
-        
+        private static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+            if (!_setting["Spells"].Cast<CheckBox>().CurrentValue)
+                return;
+            if (!sender.Owner.IsMe)
+                return;
+            if (!(new SpellSlot[] {SpellSlot.Q,SpellSlot.W,SpellSlot.E,SpellSlot.R,SpellSlot.Summoner1,SpellSlot.Summoner2
+                ,SpellSlot.Item1,SpellSlot.Item2,SpellSlot.Item3,SpellSlot.Item4,SpellSlot.Item5,SpellSlot.Item6,SpellSlot.Trinket})
+                .Contains(args.Slot))
+                return;
+            if (Environment.TickCount - LastSpell.CastTick < 50)
+            {
+                args.Process = false;
+                BlockedCount += 1;
+            }
+            else
+            {
+                LastSpell = new LastSpellCast() { Slot = args.Slot, CastTick = Environment.TickCount };
+            }
+            if (LastSpellsCast.Any(x => x.Slot == args.Slot))
+            {
+                LastSpellCast spell = LastSpellsCast.FirstOrDefault(x => x.Slot == args.Slot);
+                if (spell != null)
+                {
+                    if (Environment.TickCount - spell.CastTick <= 250 + Game.Ping)
+                    {
+                        args.Process = false;
+                        BlockedCount += 1;
+                    }
+                    else
+                    {
+                        LastSpellsCast.RemoveAll(x => x.Slot == args.Slot);
+                        LastSpellsCast.Add(new LastSpellCast() { Slot = args.Slot, CastTick = Environment.TickCount });
+                    }
+                }
+                else
+                {
+                    LastSpellsCast.Add(new LastSpellCast() { Slot = args.Slot, CastTick = Environment.TickCount });
+                }
+            }
+            else
+            {
+                LastSpellsCast.Add(new LastSpellCast() { Slot = args.Slot, CastTick = Environment.TickCount });
+            }
+        }   
 
         public static bool IsWall(Vector3 vector)
         {
@@ -180,11 +178,11 @@ namespace LittleHumanizer
 
         public class LastSpellCast
         {
-            public int CastTick;
+            public int CastTick = 0;
             public SpellSlot Slot = SpellSlot.Unknown;
         }
-        
-        static Vector3 Randomize(Vector3 position, int min, int max)
+
+        public static Vector3 Randomize(Vector3 position, int min, int max)
         {
             var ran = new Random(Environment.TickCount);
             return position + new Vector2(ran.Next(min, max), ran.Next(min, max)).To3D();
