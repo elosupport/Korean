@@ -36,6 +36,12 @@ namespace LittleHumanizer
             return y;
         }
 
+        static Vector3 Randomize(Vector3 position, int min, int max)
+        {
+            var ran = new Random(Environment.TickCount);
+            return position + new Vector2(ran.Next(min, max), ran.Next(min, max)).To3D();
+        }
+
         static void Main(string[] args)
         {
             _lastCommandT = new Dictionary<string, int>();
@@ -102,8 +108,8 @@ namespace LittleHumanizer
             {
                 _thisMovementCommandHasBeenTamperedWith = true;
                 issueOrderEventArgs.Process = false;
-                ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo,
-                    issueOrderEventArgs.TargetPosition.Randomize(-10, 10));
+                Player.IssueOrder(GameObjectOrder.MoveTo, 
+                    Randomize(issueOrderEventArgs.TargetPosition, -10, 10));
             }
             _thisMovementCommandHasBeenTamperedWith = false;
             _lastCommandT.Remove(orderName);
@@ -158,12 +164,6 @@ namespace LittleHumanizer
             {
                 LastSpellsCast.Add(new LastSpellCast { Slot = args.Slot, CastTick = Environment.TickCount });
             }
-        }
-
-        public static Vector3 Randomize(Vector3 position, int min, int max)
-        {
-            var ran = new Random(Environment.TickCount);
-            return position + new Vector2(ran.Next(min, max), ran.Next(min, max)).To3D();
         }
 
         public static bool IsWall(Vector3 vector)
