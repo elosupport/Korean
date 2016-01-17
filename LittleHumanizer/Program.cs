@@ -36,12 +36,6 @@ namespace LittleHumanizer
             return y;
         }
 
-        static Vector3 Randomize(Vector3 position, int min, int max)
-        {
-            var ran = new Random(Environment.TickCount);
-            return position + new Vector2(ran.Next(min, max), ran.Next(min, max)).To3D();
-        }
-
         static void Main(string[] args)
         {
             _lastCommandT = new Dictionary<string, int>();
@@ -54,6 +48,93 @@ namespace LittleHumanizer
                 _lastCommandT.Add("spellcast" + spellslot, 0);
             }
             Loading.OnLoadingComplete += OnLoadingComplete;
+            Player.OnIssueOrder += (sender, issueOrderEventArgs) =>
+            {
+                if (sender.IsMe && !issueOrderEventArgs.IsAttackMove)
+                {
+                    if (issueOrderEventArgs.Order == GameObjectOrder.AttackUnit ||
+                        issueOrderEventArgs.Order == GameObjectOrder.AttackTo &&
+                        !_menu["Attacks"].Cast<CheckBox>().CurrentValue)
+                        return;
+                    if (issueOrderEventArgs.Order == GameObjectOrder.MoveTo &&
+                        !_menu["Movement"].Cast<CheckBox>().CurrentValue)
+                        return;
+                }
+
+                var orderName = issueOrderEventArgs.Order.ToString();
+                var order = _lastCommandT.FirstOrDefault(e => e.Key == orderName);
+                if (Environment.TickCount - order.Value <
+                    Randomize(
+                        1000 / _menu["MaxClicks"].Cast<Slider>().CurrentValue,
+                        1000 / _menu["MinClicks"].Cast<Slider>().CurrentValue) + _random.Next(-10, 10))
+                {
+                    _blockedCount += 1;
+                    issueOrderEventArgs.Process = false;
+                    return;
+                }
+                if (issueOrderEventArgs.Order == GameObjectOrder.MoveTo &&
+                            issueOrderEventArgs.TargetPosition.IsValid() && !_thisMovementCommandHasBeenTamperedWith)
+                {
+                    _thisMovementCommandHasBeenTamperedWith = true;
+                    issueOrderEventArgs.Process = false;
+                    Player.IssueOrder(GameObjectOrder.MoveTo,
+                        Randomize(issueOrderEventArgs.TargetPosition, -10, 10));
+                }
+                _thisMovementCommandHasBeenTamperedWith = false;
+                _lastCommandT.Remove(orderName);
+                _lastCommandT.Add(orderName, Environment.TickCount);
+            };
+
+            Spellbook.OnCastSpell += (Spellbook sender, SpellbookCastSpellEventArgs arg) =>
+            {
+                if (!_menu["Spells"].Cast<CheckBox>().CurrentValue)
+                    return;
+                if (!sender.Owner.IsMe)
+                    return;
+                if (!(new[]
+                {
+                SpellSlot.Q, SpellSlot.W, SpellSlot.E, SpellSlot.R, SpellSlot.Summoner1, SpellSlot.Summoner2
+                , SpellSlot.Item1, SpellSlot.Item2, SpellSlot.Item3, SpellSlot.Item4, SpellSlot.Item5, SpellSlot.Item6,
+                SpellSlot.Trinket
+            })
+                    .Contains(arg.Slot))
+                    return;
+                if (Environment.TickCount - LastSpell.CastTick < 50)
+                {
+                    arg.Process = false;
+                    _blockedCount += 1;
+                }
+                else
+                {
+                    LastSpell = new LastSpellCast { Slot = arg.Slot, CastTick = Environment.TickCount };
+                }
+                if (LastSpellsCast.Any(x => x.Slot == arg.Slot))
+                {
+                    var spell = LastSpellsCast.FirstOrDefault(x => x.Slot == arg.Slot);
+                    if (spell != null)
+                    {
+                        if (Environment.TickCount - spell.CastTick <= 250 + Game.Ping)
+                        {
+                            arg.Process = false;
+                            _blockedCount += 1;
+                        }
+                        else
+                        {
+                            LastSpellsCast.RemoveAll(x => x.Slot == arg.Slot);
+                            LastSpellsCast.Add(new LastSpellCast { Slot = arg.Slot, CastTick = Environment.TickCount });
+                        }
+                    }
+                    else
+                    {
+                        LastSpellsCast.Add(new LastSpellCast { Slot = arg.Slot, CastTick = Environment.TickCount });
+                    }
+                }
+                else
+                {
+                    LastSpellsCast.Add(new LastSpellCast { Slot = arg.Slot, CastTick = Environment.TickCount });
+                }
+            };
+
         }
 
         static void OnLoadingComplete(EventArgs args)
@@ -80,92 +161,11 @@ namespace LittleHumanizer
         }
 
 
-        public static void Player_OnIssueOrder(Obj_AI_Base sender, PlayerIssueOrderEventArgs issueOrderEventArgs)
-        {
-            if (sender.IsMe && !issueOrderEventArgs.IsAttackMove)
-            {
-                if (issueOrderEventArgs.Order == GameObjectOrder.AttackUnit ||
-                    issueOrderEventArgs.Order == GameObjectOrder.AttackTo &&
-                    !_menu["Attacks"].Cast<CheckBox>().CurrentValue)
-                    return;
-                if (issueOrderEventArgs.Order == GameObjectOrder.MoveTo &&
-                    !_menu["Movement"].Cast<CheckBox>().CurrentValue)
-                    return;
-            }
+        //public static void Player_OnIssueOrder(Obj_AI_Base sender, PlayerIssueOrderEventArgs issueOrderEventArgs)
+        
 
-            var orderName = issueOrderEventArgs.Order.ToString();
-            var order = _lastCommandT.FirstOrDefault(e => e.Key == orderName);
-            if (Environment.TickCount - order.Value <
-                Randomize(
-                    1000/_menu["MaxClicks"].Cast<Slider>().CurrentValue,
-                    1000/_menu["MinClicks"].Cast<Slider>().CurrentValue) + _random.Next(-10, 10))
-            {
-                _blockedCount += 1;
-                issueOrderEventArgs.Process = false;
-                return;
-            }
-            if (issueOrderEventArgs.Order == GameObjectOrder.MoveTo &&
-                        issueOrderEventArgs.TargetPosition.IsValid() && !_thisMovementCommandHasBeenTamperedWith)
-            {
-                _thisMovementCommandHasBeenTamperedWith = true;
-                issueOrderEventArgs.Process = false;
-                Player.IssueOrder(GameObjectOrder.MoveTo, 
-                    Randomize(issueOrderEventArgs.TargetPosition, -10, 10));
-            }
-            _thisMovementCommandHasBeenTamperedWith = false;
-            _lastCommandT.Remove(orderName);
-            _lastCommandT.Add(orderName, Environment.TickCount);
-        }
-
-        private static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
-        {
-            if (!_menu["Spells"].Cast<CheckBox>().CurrentValue)
-                return;
-            if (!sender.Owner.IsMe)
-                return;
-            if (!(new[]
-            {
-                SpellSlot.Q, SpellSlot.W, SpellSlot.E, SpellSlot.R, SpellSlot.Summoner1, SpellSlot.Summoner2
-                , SpellSlot.Item1, SpellSlot.Item2, SpellSlot.Item3, SpellSlot.Item4, SpellSlot.Item5, SpellSlot.Item6,
-                SpellSlot.Trinket
-            })
-                .Contains(args.Slot))
-                return;
-            if (Environment.TickCount - LastSpell.CastTick < 50)
-            {
-                args.Process = false;
-                _blockedCount += 1;
-            }
-            else
-            {
-                LastSpell = new LastSpellCast { Slot = args.Slot, CastTick = Environment.TickCount };
-            }
-            if (LastSpellsCast.Any(x => x.Slot == args.Slot))
-            {
-                var spell = LastSpellsCast.FirstOrDefault(x => x.Slot == args.Slot);
-                if (spell != null)
-                {
-                    if (Environment.TickCount - spell.CastTick <= 250 + Game.Ping)
-                    {
-                        args.Process = false;
-                        _blockedCount += 1;
-                    }
-                    else
-                    {
-                        LastSpellsCast.RemoveAll(x => x.Slot == args.Slot);
-                        LastSpellsCast.Add(new LastSpellCast { Slot = args.Slot, CastTick = Environment.TickCount });
-                    }
-                }
-                else
-                {
-                    LastSpellsCast.Add(new LastSpellCast { Slot = args.Slot, CastTick = Environment.TickCount });
-                }
-            }
-            else
-            {
-                LastSpellsCast.Add(new LastSpellCast { Slot = args.Slot, CastTick = Environment.TickCount });
-            }
-        }
+        //private static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        
 
         public static bool IsWall(Vector3 vector)
         {
@@ -177,6 +177,11 @@ namespace LittleHumanizer
             public int CastTick;
             public SpellSlot Slot = SpellSlot.Unknown;
         }
-
+        
+        static Vector3 Randomize(Vector3 position, int min, int max)
+        {
+            var ran = new Random(Environment.TickCount);
+            return position + new Vector2(ran.Next(min, max), ran.Next(min, max)).To3D();
+        }
     }
 }
