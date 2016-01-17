@@ -63,7 +63,9 @@ namespace LittleHumanizer
             _setting.Add("Attacks", new CheckBox("Humanize Attacks"));
             _setting.Add("Movements", new CheckBox("Humanize Movements"));
             _setting.Add("MinClicks", new Slider("Min clicks per second", _random.Next(6, 7), 1, 7));
-            _setting.Add("MaxClicks", new Slider("Max clicks per second", _random.Next(0, 1) > 0 ? (int)Math.Floor(RandomizeSliderValues(7, 11)) : (int)Math.Ceiling(RandomizeSliderValues(7, 11)), 7, 15));
+            _setting.Add("MaxClicks",
+                new Slider("Max clicks per second",
+                     _random.Next(0, 1) > 0 ? (int)Math.Floor(Randomize(7, 11)) : (int)Math.Ceiling(Randomize(7, 11)), 7, 15));
         }
 
         public static void Drawings_OnDraw(EventArgs args)
@@ -88,8 +90,8 @@ namespace LittleHumanizer
             var order = _lastCommandT.FirstOrDefault(e => e.Key == orderName);
             if (Environment.TickCount - order.Value <
                 Randomize(
-                    1000 / _menu["MaxClicks"].Cast<CheckBox>().CurrentValue,
-                    1000 / _menu["MinClicks"].Cast<CheckBox>().CurrentValue) + _random.Next(-10, 10))
+                    1000/_menu["MaxClicks"].Cast<CheckBox>().CurrentValue,
+                    1000/_menu["MinClicks"].Cast<CheckBox>().CurrentValue) + _random.Next(-10, 10))
             {
                 _blockedCount += 1;
                 issueOrderEventArgs.Process = false;
