@@ -90,8 +90,8 @@ namespace LittleHumanizer
             var order = _lastCommandT.FirstOrDefault(e => e.Key == orderName);
             if (Environment.TickCount - order.Value <
                 Randomize(
-                    1000/_menu["MaxClicks"].Cast<CheckBox>().CurrentValue,
-                    1000/_menu["MinClicks"].Cast<CheckBox>().CurrentValue) + _random.Next(-10, 10))
+                    1000/_menu["MaxClicks"].Cast<Slider>().CurrentValue,
+                    1000/_menu["MinClicks"].Cast<Slider>().CurrentValue) + _random.Next(-10, 10))
             {
                 _blockedCount += 1;
                 issueOrderEventArgs.Process = false;
@@ -127,7 +127,7 @@ namespace LittleHumanizer
             if (Environment.TickCount - LastSpell.CastTick < 50)
             {
                 args.Process = false;
-                BlockedSpellsCount += 1;
+                _blockedCount += 1;
             }
             else
             {
@@ -141,7 +141,7 @@ namespace LittleHumanizer
                     if (Environment.TickCount - spell.CastTick <= 250 + Game.Ping)
                     {
                         args.Process = false;
-                        BlockedClicksCount += 1;
+                        _blockedCount += 1;
                     }
                     else
                     {
