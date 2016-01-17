@@ -16,10 +16,15 @@ namespace LittleHumanizer
         static Menu _menu, _setting;
         static Random _random;
         static Dictionary<string, int> _lastCommandT;
-        static int _blockedCount = 0;
+        public static int BlockedCount = 0;
         static bool _thisMovementCommandHasBeenTamperedWith = false;
         public static LastSpellCast LastSpell = new LastSpellCast();
         public static List<LastSpellCast> LastSpellsCast = new List<LastSpellCast>();
+
+        public static int GameTimeTickCount
+        {
+            get { return (int)(Game.Time * 1000); }
+        }
 
         static double Randomize(int min, int max)
         {
@@ -39,7 +44,6 @@ namespace LittleHumanizer
         static void OnLoadingComplete(EventArgs args)
         {
             Chat.Print("LittleHumanizer Loaded! By Support");
-            _random = new Random(Environment.TickCount - Environment.TickCount);
             _menu = MainMenu.AddMenu("LittleHumanizer", "LittleHumanizer");
             _menu.AddGroupLabel("LittleHumanizer");
             _menu.AddLabel("Based on 'I'm a Sharp Human Pro'");
@@ -57,6 +61,7 @@ namespace LittleHumanizer
 
         static void Main(string[] args)
         {
+            _random = new Random(DateTime.Now.Millisecond);
             _lastCommandT = new Dictionary<string, int>();
             foreach (var order in Enum.GetValues(typeof(GameObjectOrder)))
             {
@@ -67,10 +72,9 @@ namespace LittleHumanizer
                 _lastCommandT.Add("spellcast" + spellslot, 0);
             }
             Loading.OnLoadingComplete += OnLoadingComplete;
-
             Drawing.OnDraw += onDrawArgs =>
             {
-                Drawing.DrawText(Drawing.Width - 190, 100, System.Drawing.Color.Lime, "Blocked : " + _blockedCount + " Clicks");
+                Drawing.DrawText(Drawing.Width - 190, 100, System.Drawing.Color.Lime, "Blocked : " + BlockedCount + " Clicks");
             };
 
             Player.OnIssueOrder += (sender, issueOrderEventArgs) =>
@@ -88,12 +92,12 @@ namespace LittleHumanizer
 
                 var orderName = issueOrderEventArgs.Order.ToString();
                 var order = _lastCommandT.FirstOrDefault(e => e.Key == orderName);
-                if (Environment.TickCount - order.Value <
+                if (Environment.TickCount - Environment.TickCount <
                     Randomize(
                         1000 / _menu["MaxClicks"].Cast<Slider>().CurrentValue,
                         1000 / _menu["MinClicks"].Cast<Slider>().CurrentValue) + _random.Next(-10, 10))
                 {
-                    _blockedCount += 1;
+                    BlockedCount += 1;
                     issueOrderEventArgs.Process = false;
                     return;
                 }
@@ -127,7 +131,7 @@ namespace LittleHumanizer
                 if (Environment.TickCount - LastSpell.CastTick < 50)
                 {
                     arg.Process = false;
-                    _blockedCount += 1;
+                    BlockedCount += 1;
                 }
                 else
                 {
@@ -141,7 +145,7 @@ namespace LittleHumanizer
                         if (Environment.TickCount - spell.CastTick <= 250 + Game.Ping)
                         {
                             arg.Process = false;
-                            _blockedCount += 1;
+                            BlockedCount += 1;
                         }
                         else
                         {
