@@ -58,6 +58,7 @@ namespace LittleHumanizer
 
         static void OnLoadingComplete(EventArgs args)
         {
+            Chat.Print("LittleHumanizer Loaded! By Support");
             _random = new Random(Environment.TickCount - Environment.TickCount);
             _menu = MainMenu.AddMenu("LittleHumanizer", "LittleHumanizer");
             _menu.AddGroupLabel("LittleHumanizer");
@@ -72,12 +73,12 @@ namespace LittleHumanizer
             _setting.Add("MaxClicks",
                 new Slider("Max clicks per second",
                      _random.Next(0, 1) > 0 ? (int)Math.Floor(Randomize(7, 11)) : (int)Math.Ceiling(Randomize(7, 11)), 7, 15));
+            Drawing.OnDraw += onDrawArgs =>
+            {
+                    Drawing.DrawText(Drawing.Width - 190, 100, System.Drawing.Color.Lime, "Blocked : " + _blockedCount + " Clicks");
+            };
         }
 
-        public static void Drawings_OnDraw(EventArgs args)
-        {
-            Drawing.DrawText(Drawing.Width - 190, 100, System.Drawing.Color.Lime, "Blocked : " + _blockedCount + " Clicks");
-        }
 
         public static void Player_OnIssueOrder(Obj_AI_Base sender, PlayerIssueOrderEventArgs issueOrderEventArgs)
         {
