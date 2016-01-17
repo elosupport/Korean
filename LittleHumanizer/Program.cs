@@ -36,6 +36,25 @@ namespace LittleHumanizer
             return y;
         }
 
+        static void OnLoadingComplete(EventArgs args)
+        {
+            Chat.Print("LittleHumanizer Loaded! By Support");
+            _random = new Random(Environment.TickCount - Environment.TickCount);
+            _menu = MainMenu.AddMenu("LittleHumanizer", "LittleHumanizer");
+            _menu.AddGroupLabel("LittleHumanizer");
+            _menu.AddLabel("Based on 'I'm a Sharp Human Pro'");
+            _setting = _menu.AddSubMenu("Settings", "settings");
+            _setting.AddGroupLabel("Settings");
+            _setting.AddLabel("Delays");
+            _setting.Add("Spells", new CheckBox("Humanize Spells"));
+            _setting.Add("Attacks", new CheckBox("Humanize Attacks"));
+            _setting.Add("Movements", new CheckBox("Humanize Movements"));
+            _setting.Add("MinClicks", new Slider("Min clicks per second", _random.Next(6, 7), 1, 7));
+            _setting.Add("MaxClicks",
+                new Slider("Max clicks per second",
+                     _random.Next(0, 1) > 0 ? (int)Math.Floor(Randomize(7, 11)) : (int)Math.Ceiling(Randomize(7, 11)), 7, 15));
+        }
+
         static void Main(string[] args)
         {
             _lastCommandT = new Dictionary<string, int>();
@@ -48,6 +67,12 @@ namespace LittleHumanizer
                 _lastCommandT.Add("spellcast" + spellslot, 0);
             }
             Loading.OnLoadingComplete += OnLoadingComplete;
+
+            Drawing.OnDraw += onDrawArgs =>
+            {
+                Drawing.DrawText(Drawing.Width - 190, 100, System.Drawing.Color.Lime, "Blocked : " + _blockedCount + " Clicks");
+            };
+
             Player.OnIssueOrder += (sender, issueOrderEventArgs) =>
             {
                 if (sender.IsMe && !issueOrderEventArgs.IsAttackMove)
@@ -135,29 +160,6 @@ namespace LittleHumanizer
                 }
             };
 
-        }
-
-        static void OnLoadingComplete(EventArgs args)
-        {
-            Chat.Print("LittleHumanizer Loaded! By Support");
-            _random = new Random(Environment.TickCount - Environment.TickCount);
-            _menu = MainMenu.AddMenu("LittleHumanizer", "LittleHumanizer");
-            _menu.AddGroupLabel("LittleHumanizer");
-            _menu.AddLabel("Based on 'I'm a Sharp Human Pro'");
-            _setting = _menu.AddSubMenu("Settings", "settings");
-            _setting.AddGroupLabel("Settings");
-            _setting.AddLabel("Delays");
-            _setting.Add("Spells", new CheckBox("Humanize Spells"));
-            _setting.Add("Attacks", new CheckBox("Humanize Attacks"));
-            _setting.Add("Movements", new CheckBox("Humanize Movements"));
-            _setting.Add("MinClicks", new Slider("Min clicks per second", _random.Next(6, 7), 1, 7));
-            _setting.Add("MaxClicks",
-                new Slider("Max clicks per second",
-                     _random.Next(0, 1) > 0 ? (int)Math.Floor(Randomize(7, 11)) : (int)Math.Ceiling(Randomize(7, 11)), 7, 15));
-            Drawing.OnDraw += onDrawArgs =>
-            {
-                    Drawing.DrawText(Drawing.Width - 190, 100, System.Drawing.Color.Lime, "Blocked : " + _blockedCount + " Clicks");
-            };
         }
 
 
