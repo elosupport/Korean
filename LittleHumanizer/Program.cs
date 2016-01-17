@@ -99,7 +99,7 @@ namespace LittleHumanizer
 
                 var orderName = issueOrderEventArgs.Order.ToString();
                 var order = _lastCommandT.FirstOrDefault(e => e.Key == orderName);
-                if (Environment.TickCount - Environment.TickCount <
+                if (Environment.TickCount - order.Value <
                     Randomize(
                         1000 / _menu["MaxClicks"].Cast<Slider>().CurrentValue,
                         1000 / _menu["MinClicks"].Cast<Slider>().CurrentValue) + _random.Next(-10, 10))
