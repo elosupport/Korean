@@ -91,7 +91,7 @@ namespace LittleHumanizer
                         !_menu["Attacks"].Cast<CheckBox>().CurrentValue)
                         return;
                     if (issueOrderEventArgs.Order == GameObjectOrder.MoveTo &&
-                        !_menu["Movement"].Cast<CheckBox>().CurrentValue)
+                        !_menu["Movements"].Cast<CheckBox>().CurrentValue)
                         return;
                 }
 
