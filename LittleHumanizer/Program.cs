@@ -11,8 +11,6 @@ using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using EloBuddy.SDK.Rendering;
 using SharpDX;
-using SharpDX.Direct3D9;
-using SharpDX.Direct3D;
 using System.Drawing;
 using Color = System.Drawing.Color;
 
