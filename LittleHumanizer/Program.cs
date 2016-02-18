@@ -46,7 +46,7 @@ namespace LittleHumanizer
             return y;
         }
 
-        public static void OnLoadingComplete(EventArgs args)
+        public static void Game_OnGameLoad(EventArgs args)
         {
             Chat.Print("LittleHumanizer Loaded! By Support");
             _menu = MainMenu.AddMenu("LittleHumanizer", "LittleHumanizer");
@@ -62,6 +62,14 @@ namespace LittleHumanizer
             _setting.Add("MaxClicks",
                 new Slider("Max clicks per second",
                      _random.Next(0, 1) > 0 ? (int)Math.Floor(Randomize(7, 11)) : (int)Math.Ceiling(Randomize(7, 11)), 7, 15));
+            Player.OnIssueOrder += Player_OnIssueOrder;
+        }
+
+        public static void Game_OnGameLoad_Disabled(EventArgs args)
+        {
+            Chat.Print("<font color='#ff0000'>Failed to load LittleHumanizer!</font>");
+            _menu = MainMenu.AddMenu("LittleHumanizer(Disabled)", "LittleHumanizer(Disabled)", "LittleHumanizer(Disabled)");
+            _menu.AddLabel("Failed to load LittleHumanizer! Please wait for update.");
         }
 
         public static void Main(string[] args)
@@ -76,51 +84,50 @@ namespace LittleHumanizer
             {
                 _lastCommandT.Add("spellcast" + spellslot, 0);
             }
-            Loading.OnLoadingComplete += OnLoadingComplete;
+            Loading.OnLoadingComplete += Game_OnGameLoad;
             Drawing.OnDraw += onDrawArgs =>
             {
                 Drawing.DrawText(Drawing.Width - 190, 100, System.Drawing.Color.Lime, "Blocked : " + BlockedCount + " Clicks");
             };
-
-            Player.OnIssueOrder += (sender, issueOrderEventArgs) =>
-            {
-                if (sender.IsMe && !issueOrderEventArgs.IsAttackMove)
-                {
-                    if (issueOrderEventArgs.Order == GameObjectOrder.AttackUnit ||
-                        issueOrderEventArgs.Order == GameObjectOrder.AttackTo &&
-                        !_menu["Attacks"].Cast<CheckBox>().CurrentValue)
-                        return;
-                    if (issueOrderEventArgs.Order == GameObjectOrder.MoveTo &&
-                        !_menu["Movements"].Cast<CheckBox>().CurrentValue)
-                        return;
-                }
-
-                var orderName = issueOrderEventArgs.Order.ToString();
-                var order = _lastCommandT.FirstOrDefault(e => e.Key == orderName);
-                if (Environment.TickCount - order.Value <
-                    Randomize(
-                        1000 / _menu["MaxClicks"].Cast<Slider>().CurrentValue,
-                        1000 / _menu["MinClicks"].Cast<Slider>().CurrentValue) + _random.Next(-10, 10))
-                {
-                    BlockedCount += 1;
-                    issueOrderEventArgs.Process = false;
-                    return;
-                }
-                if (issueOrderEventArgs.Order == GameObjectOrder.MoveTo &&
-                            issueOrderEventArgs.TargetPosition.IsValid() && !_thisMovementCommandHasBeenTamperedWith)
-                {
-                    _thisMovementCommandHasBeenTamperedWith = true;
-                    issueOrderEventArgs.Process = false;
-                    Player.IssueOrder(GameObjectOrder.MoveTo,
-                        Randomize(issueOrderEventArgs.TargetPosition, -10, 10));
-                }
-                _thisMovementCommandHasBeenTamperedWith = false;
-                _lastCommandT.Remove(orderName);
-                _lastCommandT.Add(orderName, Environment.TickCount);
-            };
-
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
 
+        }
+
+        public static void Player_OnIssueOrder(Obj_AI_Base sender, PlayerIssueOrderEventArgs issueOrderEventArgs)
+        {
+            if (sender.IsMe && !issueOrderEventArgs.IsAttackMove)
+            {
+                if (issueOrderEventArgs.Order == GameObjectOrder.AttackUnit ||
+                    issueOrderEventArgs.Order == GameObjectOrder.AttackTo &&
+                    !_menu["Attacks"].Cast<CheckBox>().CurrentValue)
+                    return;
+                if (issueOrderEventArgs.Order == GameObjectOrder.MoveTo &&
+                    !_menu["Movements"].Cast<CheckBox>().CurrentValue)
+                    return;
+            }
+
+            var orderName = issueOrderEventArgs.Order.ToString();
+            var order = _lastCommandT.FirstOrDefault(e => e.Key == orderName);
+            if (Environment.TickCount - order.Value<
+                Randomize(
+                    1000 / _menu["MaxClicks"].Cast<Slider>().CurrentValue,
+                    1000 / _menu["MinClicks"].Cast<Slider>().CurrentValue) + _random.Next(-10, 10))
+            {
+                BlockedCount += 1;
+                issueOrderEventArgs.Process = false;
+                return;
+            }
+            if (issueOrderEventArgs.Order == GameObjectOrder.MoveTo &&
+                        issueOrderEventArgs.TargetPosition.IsValid() && !_thisMovementCommandHasBeenTamperedWith)
+            {
+                _thisMovementCommandHasBeenTamperedWith = true;
+                issueOrderEventArgs.Process = false;
+                Player.IssueOrder(GameObjectOrder.MoveTo,
+                    Randomize(issueOrderEventArgs.TargetPosition, -10, 10));
+            }
+            _thisMovementCommandHasBeenTamperedWith = false;
+            _lastCommandT.Remove(orderName);
+            _lastCommandT.Add(orderName, Environment.TickCount);
         }
 
         private static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)

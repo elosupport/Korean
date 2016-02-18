@@ -1,0 +1,13 @@
+D:\user\Documents\GitHub\Korean\LittleHumanizer\bin\Release\LittleHumanizer.exe.config
+D:\user\Documents\GitHub\Korean\LittleHumanizer\bin\Release\LittleHumanizer.exe
+D:\user\Documents\GitHub\Korean\LittleHumanizer\bin\Release\LittleHumanizer.pdb
+D:\user\Documents\GitHub\Korean\LittleHumanizer\bin\Release\EloBuddy.dll
+D:\user\Documents\GitHub\Korean\LittleHumanizer\bin\Release\EloBuddy.Networking.dll
+D:\user\Documents\GitHub\Korean\LittleHumanizer\bin\Release\EloBuddy.SDK.dll
+D:\user\Documents\GitHub\Korean\LittleHumanizer\bin\Release\Newtonsoft.Json.dll
+D:\user\Documents\GitHub\Korean\LittleHumanizer\bin\Release\SharpDX.Direct3D9.dll
+D:\user\Documents\GitHub\Korean\LittleHumanizer\bin\Release\SharpDX.dll
+D:\user\Documents\GitHub\Korean\LittleHumanizer\bin\Release\SharpDX.XInput.dll
+D:\user\Documents\GitHub\Korean\LittleHumanizer\obj\Release\LittleHumanizer.csprojResolveAssemblyReference.cache
+D:\user\Documents\GitHub\Korean\LittleHumanizer\obj\Release\LittleHumanizer.exe
+D:\user\Documents\GitHub\Korean\LittleHumanizer\obj\Release\LittleHumanizer.pdb
