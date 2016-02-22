@@ -504,7 +504,6 @@ namespace Evade
             if (ObjectManager.Player.IsDashing())
             {
                 Evading = false;
-                NoSolutionFound = true;
                 return;
             }
 
@@ -935,7 +934,7 @@ namespace Evade
 
             foreach (var evadeSpell in EvadeSpellDatabase.Spells)
             {
-                if (evadeSpell.Enabled && evadeSpell.DangerLevel >= dangerLevel)
+                if (evadeSpell.Enabled && evadeSpell.DangerLevel <= dangerLevel)
                 {
                     //SpellShields
                     if (evadeSpell.IsSpellShield &&
