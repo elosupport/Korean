@@ -25,11 +25,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("Evade")]
+[assembly: AssemblyTitle("Evade Fixed")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Evade")]
+[assembly: AssemblyProduct("Evade Fixed")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -55,5 +55,5 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("5.16.0.1")]
-[assembly: AssemblyFileVersion("5.16.0.1")]
+[assembly: AssemblyVersion("2015.02.22.1")]
+[assembly: AssemblyFileVersion("2015.02.22.1")]

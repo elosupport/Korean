@@ -504,9 +504,7 @@ namespace Evade
             if (ObjectManager.Player.IsDashing())
             {
                 Evading = false;
-                EvadeToPoint = Vector2.Zero;
-                PathFollower.Stop();
-                //NoSolutionFound = true; //Test for disabling the evading.
+                NoSolutionFound = true;
                 return;
             }
 
@@ -553,7 +551,6 @@ namespace Evade
                 }
             }
             */
-
             //Spell Shielded
             if (ObjectManager.Player.MagicShield > 0)
             {
@@ -597,17 +594,17 @@ namespace Evade
                 {
                     //We are safe, stop evading.
                     Evading = false;
+                    NoSolutionFound = true;
                 }
                 else
                 {
-                    /*if (Utils.TickCount - LastSentMovePacketT > 1000/15)
+                    if (Utils.TickCount - LastSentMovePacketT > 1000/15)
                     {
                         LastSentMovePacketT = Utils.TickCount;
                         ObjectManager.Player.SendMovePacket(EvadePoint);
                     }
-                    return;*/
+                    return;
                 }
-
             }
                 //Stop evading if the point is not safe.
             else if (Evading)
@@ -636,13 +633,6 @@ namespace Evade
                 }
             }
         }
-
-
-        public static AIHeroClient PlayerInstance
-        {
-            get { return Player.Instance; }
-        }
-
 
         static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
@@ -742,6 +732,12 @@ namespace Evade
                     new Vector3(args.TargetPosition.X, args.TargetPosition.Y, ObjectManager.Player.ServerPosition.Z)).To2DList();
             var safeResult = IsSafe(PlayerPosition);
 
+            // Check for the unnessasary moving
+            if (Evading || safeResult.IsSafe)
+            {
+                Evading = false;
+                NoSolutionFound = true;
+            }
 
             //If we are evading:
             if (Evading || !safeResult.IsSafe)
@@ -822,7 +818,14 @@ namespace Evade
         {
             if (sender.IsMe)
             {
-               Console.WriteLine(Utils.TickCount + "DASH: Speed: " + args.Speed + " Width:" + args.EndPos.Distance(args.StartPos));
+                if (Config.PrintSpellData)
+                {
+                    Console.WriteLine(
+                        Utils.TickCount + "DASH: Speed: " + args.Speed + " Width:" +
+                        args.EndPos.Distance(args.StartPos));
+                }
+
+                //Utility.DelayAction.Add(args.Duration, delegate { Evading = false; });
             }
         }
 
@@ -932,7 +935,7 @@ namespace Evade
 
             foreach (var evadeSpell in EvadeSpellDatabase.Spells)
             {
-                if (evadeSpell.Enabled && evadeSpell.DangerLevel <= dangerLevel)
+                if (evadeSpell.Enabled && evadeSpell.DangerLevel >= dangerLevel)
                 {
                     //SpellShields
                     if (evadeSpell.IsSpellShield &&
@@ -956,7 +959,7 @@ namespace Evade
                             EvadePoint = to.Closest(points);
                             var nEvadePoint = EvadePoint.Extend(PlayerPosition, -100);
                             if (
-                                IsSafePath(
+                                Program.IsSafePath(
                                     ObjectManager.Player.GetPath(nEvadePoint.To3D()).To2DList(),
                                     Config.EvadingSecondTimeOffset, (int) ObjectManager.Player.MoveSpeed, 100).IsSafe)
                             {

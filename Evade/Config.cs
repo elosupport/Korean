@@ -66,7 +66,7 @@ namespace Evade
         public const int EvadePointChangeInterval = 300;
         public static int LastEvadePointChangeT = 0;
 
-        public static Menu Menu, evadeSpells, skillShots, shielding, collision, drawings, misc, humanizer, randomizer;
+        public static Menu Menu, evadeSpells, skillShots, shielding, collision, drawings, misc, humanizer;
         public static Color EnabledColor, DisabledColor, MissileColor;
 
         public static void CreateMenu()
@@ -217,12 +217,6 @@ namespace Evade
             Menu.Add("Enabled", new KeyBind("Enabled", true, KeyBind.BindTypes.PressToggle, "K".ToCharArray()[0]));
 
             Menu.Add("OnlyDangerous", new KeyBind("Dodge only dangerous", false, KeyBind.BindTypes.HoldActive, 32)); //Space
-            randomizer = Menu.AddSubMenu("Randomizer", "Randomizer");
-            randomizer.AddLabel("Enabled Draw Color");
-            randomizer.Add("EnableRandomizer", new CheckBox("Enable", false));
-            //randomizer.Add("DrawBlockedRandomizerSpells", new CheckBox("Draw Blocked Spells", true));
-            randomizer.Add("RandomizerPercentage", new Slider("Accuracy", 80, 0, 100));
-            //randomizer.Add("RandomizerMaxDangerLevel", new ComboBox("Maximum Danger Level", (int)SpellDangerLevel.High, Enum.GetNames(typeof(SpellDangerLevel))));
         }
     }
 }

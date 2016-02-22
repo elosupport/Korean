@@ -1,14 +1,1 @@
-D:\EloBuddy 작업\EloBuddy\Evade\bin\Release\Evade.exe.config
-D:\EloBuddy 작업\EloBuddy\Evade\bin\Release\Evade.exe
-D:\EloBuddy 작업\EloBuddy\Evade\bin\Release\Evade.pdb
-D:\EloBuddy 작업\EloBuddy\Evade\bin\Release\EloBuddy.dll
-D:\EloBuddy 작업\EloBuddy\Evade\bin\Release\EloBuddy.Networking.dll
-D:\EloBuddy 작업\EloBuddy\Evade\bin\Release\EloBuddy.Sandbox.dll
-D:\EloBuddy 작업\EloBuddy\Evade\bin\Release\EloBuddy.SDK.dll
-D:\EloBuddy 작업\EloBuddy\Evade\bin\Release\Newtonsoft.Json.dll
-D:\EloBuddy 작업\EloBuddy\Evade\bin\Release\SharpDX.Direct3D9.dll
-D:\EloBuddy 작업\EloBuddy\Evade\bin\Release\SharpDX.dll
-D:\EloBuddy 작업\EloBuddy\Evade\bin\Release\SharpDX.XInput.dll
-D:\EloBuddy 작업\EloBuddy\Evade\obj\Debug\Evade.csprojResolveAssemblyReference.cache
-D:\EloBuddy 작업\EloBuddy\Evade\obj\Debug\Evade.exe
-D:\EloBuddy 작업\EloBuddy\Evade\obj\Debug\Evade.pdb
+D:\user\Documents\GitHub\Korean\Evade\bin\Release\Evade.exe.config
