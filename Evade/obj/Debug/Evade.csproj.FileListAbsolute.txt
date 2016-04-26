@@ -1,2 +1,0 @@
-D:\user\Documents\GitHub\Korean\Evade\bin\Release\Evade.exe.config
-D:\user\Documents\GitHub\Korean\Evade\obj\Debug\Evade.csprojResolveAssemblyReference.cache
